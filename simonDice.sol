@@ -11,41 +11,46 @@ contract simonDice {
     /*/////////////
             Variables de Estado
     /////////////////*/
+    
+        /// @notice Prefijo inmutable para todos los mensajes.
+
+        string private constant _MENSAJE_BASE = "Simon dice:";
+    
     ///@notice variable para almacenar mensaje de simon
-    string private _mensajeBase = "Simon dice:"; // mensaje fijo
-    string private _mensajeActual = "Hola mundo soy Simon"; // mensaje dinamico
+    
+    string private _mensajeActual = "Hola mundo soy Simon";
 
     /*//////////////
             Eventos
     ////////////*/
 
     ///@notice evento emitido con el mensaje actualizado
-    event MensajeActualizado(
-        string nuevoMensajeCompleto
-        );
+    event MensajeActualizado(string nuevoMensajeCompleto);
 	
     /*//////////////
             Funciones
     ////////////*/
 
     
-        ///  @notice funcion para actualizar mensaje en la blockchain
-        ///  @param nuevoMensaje el nuevo mensaje (sin prefijo)
+        ///  @notice Funcion interna para concatenar el prefijo con el mensaje actual
+        ///  @param mensaje dinamico a concatenar.
+        /// @return Mensaje completo con prefijo.
 
 
-    function actualizarMensaje(string memory nuevoMensaje) public {
-        _mensajeActual = nuevoMensaje;
-
-        string memory nuevoMensajeCompleto = string( 
-                abi.encodePacked(_mensajeBase, " ", _mensajeActual)
-                );
-     /// @notice evento emitido cuando cambia el mensaje
-        emit MensajeActualizado(nuevoMensajeCompleto);
+     function _concatenarMensaje(string memory mensaje) private pure returns (string memory) {
+        return string (bytes.concat(bytes(_MENSAJE_BASE), bytes(" "), bytes(mensaje)));
     }
 
-    /// @notice funcion get para devolver mensaje guardado junto con el prefijo
-    /// @return mensaje concatenado
-        function getMensajeCompleto() public view returns (string memory) {
-                return string(abi.encodePacked(_mensajeBase, " ", _mensajeActual));
-        }
+    /// @notice Actualiza el mensaje en la blockchain.
+    /// @param nuevoMensaje Nuevo mensaje (sin prefijo).
+    function actualizarMensaje(string memory nuevoMensaje) public {
+        _mensajeActual = nuevoMensaje;
+        emit MensajeActualizado(_concatenarMensaje(nuevoMensaje));
+    }
+
+    /// @notice Devuelve el mensaje completo con prefijo.
+    /// @return Mensaje concatenado.
+    function getMensajeCompleto() public view returns (string memory) {
+        return _concatenarMensaje(_mensajeActual);
+    }
 }
